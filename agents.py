@@ -129,6 +129,8 @@ class DQNAgent(BaseAgent):
                                             )
                                  )
 
+                cur_state = next_state
+
                 self._update_model()
 
             reward = np.mean(reward)
@@ -165,11 +167,12 @@ class DQNAgent(BaseAgent):
                 print('Episode {} starts.'.format(i_episode))
             rewards = []
             time_step = env.reset()
-            cur_state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
+            state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
             while not time_step.last():
-                action_ID = self.select_action(cur_state, random_choose=False)
+                action_ID = self.select_action(state, random_choose=False)
                 time_step = env.step(self.action_space[action_ID])
                 rewards.append(time_step.reward)
+                state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
 
             print('Episode {} ends. Average reward = {}.'.format(i_episode, np.mean(rewards)))
 
