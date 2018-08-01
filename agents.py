@@ -111,8 +111,6 @@ class DQNAgent(BaseAgent):
 
         rewards = []
         for i_episode in range(self.episode):
-            if verbose:
-                print('Episode {} starts.'.format(i_episode))
             reward = []
             time_step = env.reset()
             cur_state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
@@ -152,7 +150,8 @@ class DQNAgent(BaseAgent):
                                        filename='DQN_training_curve.png'
                                        )
 
-            print('Episode {} ends. Average reward = {}.'.format(i_episode, np.mean(rewards)))
+            if verbose:
+                print('Episode {} average reward: {}'.format(i_episode, reward))
         
         if verbose:
             print('End training.')
@@ -162,22 +161,27 @@ class DQNAgent(BaseAgent):
         if verbose:
             print('Start evaluation.')
 
+        rewards = []
         for i_episode in range(self.episode):
-            if verbose:
-                print('Episode {} starts.'.format(i_episode))
-            rewards = []
+            reward = []
             time_step = env.reset()
             state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
             while not time_step.last():
                 action_ID = self.select_action(state, random_choose=False)
                 time_step = env.step(self.action_space[action_ID])
-                rewards.append(time_step.reward)
+                reward.append(time_step.reward)
                 state = torch.tensor([utils.get_state(time_step.observation)], device=self.device)
 
-            print('Episode {} ends. Average reward = {}.'.format(i_episode, np.mean(rewards)))
+            reward = np.mean(reward)
+            rewards.append(reward)
+
+            if verbose:
+                print('Episode {} average reward: {}'.format(i_episode, reward))
 
         if verbose:
             print('End evaluation.')
+
+        print('Average reward: {}'.format(np.mean(rewards)))
 
 
     def save_model(self, filename='DQN_model'):
