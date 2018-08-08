@@ -67,7 +67,7 @@ def get_state(observation):
     return state
 
 
-def plot_figures(y, title=None, xlabel=None, ylabel=None, figure_num=None, display=True, save=False, filename=None):
+def plot_figure(y, x=None, title=None, xlabel=None, ylabel=None, figure_num=None, display=True, save=False, filename=None):
     if figure_num is None:
         plt.figure()
     else:
@@ -82,7 +82,10 @@ def plot_figures(y, title=None, xlabel=None, ylabel=None, figure_num=None, displ
     if ylabel is not None:
         plt.ylabel(ylabel)
 
-    plt.plot(y)
+    if x is not None:
+        plt.plot(x, y)
+    else:
+        plt.plot(y)
 
     if save:
         plt.savefig(filename if filename is not None else 'figure.png')

@@ -39,10 +39,11 @@ class DQNAgent(BaseAgent):
         self.eps_start = self.configs.eps_start
         self.eps_end = self.configs.eps_end
         self.eps_decay = self.configs.eps_decay
-        self.target_update = self.configs.target_update
+        self.target_update_episode = self.configs.target_update_episode
 
         self.model_path = self.configs.save_path
         self.save_episode = self.configs.save_episode
+        self.plot_episode = self.configs.plot_episode
 
         self.policy_net = models.DQN(self.configs, env).to(self.device)
         self.target_net = models.DQN(self.configs, env).to(self.device)
@@ -110,6 +111,7 @@ class DQNAgent(BaseAgent):
             print('Start training.')
 
         rewards = []
+        recent_rewards = []
         for i_episode in range(self.episode):
             reward = []
             time_step = env.reset()
@@ -132,26 +134,31 @@ class DQNAgent(BaseAgent):
                 self._update_model()
 
             reward = np.mean(reward)
-            rewards.append(reward)
-
-            if i_episode % self.target_update == 0:
-                self.target_net.load_state_dict(self.policy_net.state_dict())
-
-            if i_episode % self.save_episode:
-                self.save_model(self.model_path)
-                if save_training_curve:
-                    utils.plot_figures(y=rewards,
-                                       title='Training Curve',
-                                       xlabel='Episode',
-                                       ylabel='Reward',
-                                       figure_num=0,
-                                       display=display,
-                                       save=save_training_curve,
-                                       filename='DQN_training_curve.png'
-                                       )
+            recent_rewards.append(reward)
 
             if verbose:
                 print('Episode {} average reward: {}'.format(i_episode, reward))
+
+            if i_episode % self.target_update_episode == 0:
+                self.target_net.load_state_dict(self.policy_net.state_dict())
+
+            if i_episode % self.save_episode == 0:
+                self.save_model(self.model_path)
+
+            if i_episode % self.plot_episode == 0:
+                rewards.append(np.mean(recent_rewards))
+                recent_rewards = []
+                if save_training_curve:
+                    utils.plot_figure(y=rewards,
+                                      x=list(range(0, i_episode + 1, self.save_episode)),
+                                      title='Training Curve',
+                                      xlabel='Episode',
+                                      ylabel='Reward',
+                                      figure_num=0,
+                                      display=display,
+                                      save=save_training_curve,
+                                      filename='DQN_training_curve.png'
+                                      )
         
         if verbose:
             print('End training.')
