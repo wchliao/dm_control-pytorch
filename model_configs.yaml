@@ -4,10 +4,10 @@ DQN:
   gamma: 0.999
   eps_start: 0.9
   eps_end: 0.05
-  eps_decay: 1000
-  target_update: 10
+  eps_decay: 2000
+  target_update: 20
   num_hidden: 256
-  num_choice_per_dim: 40
+  num_choice_per_dim: 7
 
   optimizer_lr: 1e-3
   optimizer_beta1: 0.9
